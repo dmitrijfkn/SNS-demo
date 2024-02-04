@@ -78,7 +78,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers("/user/registration", "/user/login", "/user/refreshToken", "/user/logout").permitAll()
-                                .requestMatchers("/post/create").permitAll()
+                                .requestMatchers("/post/create").authenticated()
                                 .requestMatchers("/user/page/{userId}").permitAll()
                                 .requestMatchers("/user/delete/{userId}").access(userSecurity)
                                 .requestMatchers("/post/favorite/**").permitAll()

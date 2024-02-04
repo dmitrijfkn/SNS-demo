@@ -4,7 +4,6 @@ import com.kostenko.demo.proxy.seller.dto.PostDTO;
 import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.entity.User;
 import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
-import com.kostenko.demo.proxy.seller.repository.CommentRepository;
 import com.kostenko.demo.proxy.seller.repository.PostRepository;
 import com.kostenko.demo.proxy.seller.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -27,7 +26,7 @@ public class PostService {
      * Constant error message template for resource not found exceptions.
      * The placeholder %d is intended to be replaced with the specific post identifier.
      */
-    protected static String ID_NOT_FOUND_MESSAGE = "Post with id: \"%s\" doesn't exist.";
+    protected static final String ID_NOT_FOUND_MESSAGE = "Post with id: \"%s\" doesn't exist.";
     /**
      * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.Post} entities in MongoDB.
      */

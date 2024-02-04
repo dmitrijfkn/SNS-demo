@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
+
     /**
      * Service for handling user-related operations.
      */
@@ -25,20 +26,33 @@ public class UserController {
 
 
     /**
+     * Service for handling JWT-related operations.
+     */
+    private final JwtService jwtService;
+
+
+    /**
+     * Constant error message template for error, if user want to subscribe to himself.
+     */
+    protected static final String SAME_ID_MESSAGE = "User requested and user mentioned is the same.";
+
+    /**
      * Constructs a UserController with the specified dependencies.
      *
      * @param userService Service for handling user-related operations.
+     * @param jwtService  Service for handling JWT-related operations.
      */
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtService jwtService) {
         this.userService = userService;
+        this.jwtService = jwtService;
     }
+
 
     /**
      * Retrieves and returns the user page based on the provided user ID.
      *
      * @param userId The ID of the user for whom the page is requested.
-     *
      * @return A UserPageDTO representing the user page.
      */
     @ResponseStatus(HttpStatus.OK)
@@ -47,11 +61,11 @@ public class UserController {
         return userService.getUserPage(userId);
     }
 
+
     /**
      * Deletes a user from the database based on the provided user ID.
      *
      * @param userId The ID of the user to be deleted.
-     *
      * @return ResponseEntity with HTTP status OK.
      */
     @Operation(summary = "Delete user from the database")
@@ -65,13 +79,58 @@ public class UserController {
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
+    /**
+     * Follow to a user.
+     *
+     * @param userId       The ID of the user to follow.
+     * @param accessCookie Cookie used to extract request sender ID.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @Operation(summary = "Follow to a user")
+    @ApiResponse(responseCode = "200", description = "User successfully following to a user requested")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/follow/{userId}")
+    ResponseEntity<HttpStatus> followToUser(@PathVariable(name = "userId") String userId,
+                                               @CookieValue("accessToken") String accessCookie
+    ) {
+        String requesterId = jwtService.extractUserId(accessCookie);
+
+        if(requesterId.equals(userId)){
+            throw new IllegalArgumentException(SAME_ID_MESSAGE);
+        }
+
+        userService.followToUser(requesterId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * Unfollow from user.
+     *
+     * @param userId       The ID of the user to unfollow.
+     * @param accessCookie Cookie used to extract request sender ID.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @Operation(summary = "Unfollow from user")
+    @ApiResponse(responseCode = "200", description = "User successfully unfollowed from a user requested")
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/unfollow/{userId}")
+    ResponseEntity<HttpStatus> unfollowFromUser(@PathVariable(name = "userId") String userId,
+                                                   @CookieValue("accessToken") String accessCookie
+    ) {
+        String requesterId = jwtService.extractUserId(accessCookie);
+
+        if(requesterId.equals(userId)){
+            throw new IllegalArgumentException(SAME_ID_MESSAGE);
+        }
+
+        userService.unfollowFromUser(requesterId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
 
-// TODO remove all entities from request params https://stackoverflow.com/questions/69639251/should-entity-class-be-used-as-request-body
-
-// TODO search for entities in response
-
-// TODO add @ResponseStatus to requests
 
 // TODO rewrite Api docs:
 
