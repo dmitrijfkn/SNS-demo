@@ -2,8 +2,8 @@ package com.kostenko.demo.proxy.seller.controller;
 
 import com.kostenko.demo.proxy.seller.dto.CommentCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.CommentDTO;
+import com.kostenko.demo.proxy.seller.service.CommentService;
 import com.kostenko.demo.proxy.seller.service.JwtService;
-import com.kostenko.demo.proxy.seller.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,20 +23,21 @@ public class CommentController {
     private final JwtService jwtService;
 
     /**
-     * Service for handling post-related operations.
+     * Service for handling comment-related operations.
      */
-    private final PostService postService;
+    private final CommentService commentService;
 
     /**
      * Constructs a CommentController with the specified dependencies.
      *
-     * @param jwtService  Service for handling JWT-related operations.
-     * @param postService Service for handling post-related operations.
+     * @param jwtService     Service for handling JWT-related operations.
+     * @param commentService Service for handling comment-related operations.
      */
     @Autowired
-    public CommentController(JwtService jwtService, PostService postService) {
+    public CommentController(JwtService jwtService,
+                             CommentService commentService) {
         this.jwtService = jwtService;
-        this.postService = postService;
+        this.commentService = commentService;
     }
 
     /**
@@ -57,6 +58,6 @@ public class CommentController {
 
         String userId = jwtService.extractUserId(accessCookie);
 
-        return postService.createComment(userId, commentCreationDTO.getContent(), commentCreationDTO.getPostId());
+        return commentService.createComment(userId, commentCreationDTO.getContent(), commentCreationDTO.getPostId());
     }
 }

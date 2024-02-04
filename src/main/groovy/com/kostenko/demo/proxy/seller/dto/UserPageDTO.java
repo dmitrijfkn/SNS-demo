@@ -18,6 +18,11 @@ public class UserPageDTO {
 
     private Set<PostDTO> posts;
 
+    private Set<CommentDTO> comments;
+
+    private Set<LikeDTO> likes;
+
+    private Set<PostDTO> favoritePosts;
 
     private Set<SimpleUserDTO> followers;
 }

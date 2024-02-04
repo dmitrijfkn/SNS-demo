@@ -6,11 +6,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 @Document
@@ -29,6 +28,9 @@ public class User implements UserDetails {
 
     @DBRef(lazy = true)
     private Set<Post> posts;
+
+    @DBRef(lazy = true)
+    private Set<Post> favoritePosts;
 
     @DBRef
     private Set<User> followers;
@@ -100,19 +102,16 @@ public class User implements UserDetails {
         return true;
     }
 
-    public void addPost(Post post) {
-        if (this.posts == null) {
-            this.posts = Collections.emptySet();
-        }
-
-        this.posts.add(post);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
-    public void addComment(Comment comment) {
-        if (this.comments == null) {
-            this.comments = Collections.emptySet();
-        }
-
-        this.comments.add(comment);
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

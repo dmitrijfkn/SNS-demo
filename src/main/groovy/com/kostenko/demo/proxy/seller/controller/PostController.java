@@ -26,6 +26,7 @@ public class PostController {
      */
     private final JwtService jwtService;
 
+
     /**
      * Constructs a PostController with the specified dependencies.
      *
@@ -38,12 +39,12 @@ public class PostController {
         this.jwtService = jwtService;
     }
 
+
     /**
      * Creates a new post based on the provided content and access token cookie.
      *
-     * @param postCreationDTO      Dto object which should contain the content of the post.
-     * @param accessCookie         The value of the access token cookie.
-     *
+     * @param postCreationDTO Dto object which should contain the content of the post.
+     * @param accessCookie    The value of the access token cookie.
      * @return A PostDTO representing the newly created post.
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -55,12 +56,13 @@ public class PostController {
         return postService.createPost(userId, postCreationDTO.getContent());
     }
 
+
     /**
-     * Deletes a post based on the provided post ID and access token cookie.
+     * Deletes a post based on the provided post ID and user ID from access token cookie.
+     * If post with requested id doesn't exist, silently return OK
      *
      * @param postId       The ID of the post to be deleted.
      * @param accessCookie The value of the access token cookie.
-     *
      * @return ResponseEntity with HTTP status OK.
      */
     @ResponseStatus(HttpStatus.OK)
@@ -70,6 +72,44 @@ public class PostController {
         String userId = jwtService.extractUserId(accessCookie);
 
         postService.deletePost(postId, userId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * Saves a post as favorite based on the provided post ID and user ID from access token cookie.
+     *
+     * @param postId       The ID of the post to be saved to favorites.
+     * @param accessCookie The value of the access token cookie.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/favorite/add/{postId}")
+    ResponseEntity<HttpStatus> addPostToFavorites(@PathVariable(name = "postId") String postId,
+                                                  @CookieValue("accessToken") String accessCookie) {
+        String userId = jwtService.extractUserId(accessCookie);
+
+        postService.addPostToFavorites(userId, postId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * Deletes a post from favorite based on the provided post ID and user ID from access token cookie.
+     *
+     * @param postId       The ID of the post to be saved to favorites.
+     * @param accessCookie The value of the access token cookie.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/favorite/remove/{postId}")
+    ResponseEntity<HttpStatus> removePostFromFavorites(@PathVariable(name = "postId") String postId,
+                                                       @CookieValue("accessToken") String accessCookie) {
+        String userId = jwtService.extractUserId(accessCookie);
+
+        postService.removePostFromFavorites(userId, postId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

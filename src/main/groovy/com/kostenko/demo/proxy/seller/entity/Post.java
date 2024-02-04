@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -44,11 +44,16 @@ public class Post {
         return likes != null ? likes.size() : 0;
     }
 
-    public void addComment(Comment comment) {
-        if (this.comments == null) {
-            this.comments = Collections.emptySet();
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return Objects.equals(id, post.id);
+    }
 
-        this.comments.add(comment);
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

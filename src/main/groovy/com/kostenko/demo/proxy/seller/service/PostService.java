@@ -1,8 +1,6 @@
 package com.kostenko.demo.proxy.seller.service;
 
-import com.kostenko.demo.proxy.seller.dto.CommentDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
-import com.kostenko.demo.proxy.seller.entity.Comment;
 import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.entity.User;
 import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
@@ -11,6 +9,10 @@ import com.kostenko.demo.proxy.seller.repository.PostRepository;
 import com.kostenko.demo.proxy.seller.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +27,7 @@ public class PostService {
      * Constant error message template for resource not found exceptions.
      * The placeholder %d is intended to be replaced with the specific post identifier.
      */
-    protected static String ID_NOT_FOUND_MESSAGE = "Post with id: \"%d\" doesn't exist.";
+    protected static String ID_NOT_FOUND_MESSAGE = "Post with id: \"%s\" doesn't exist.";
     /**
      * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.Post} entities in MongoDB.
      */
@@ -34,30 +36,27 @@ public class PostService {
      * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.User} entities in MongoDB.
      */
     private final UserRepository userRepository;
-    /**
-     * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.Comment} entities in MongoDB.
-     */
-    private final CommentRepository commentRepository;
+
     /**
      * Mapper for converting entities to DTOs and vice versa.
      */
     private final ModelMapper modelMapper;
+    private final MongoTemplate mongoTemplate;
 
     /**
      * Constructs a PostService with the specified repositories and model mapper.
      *
-     * @param postRepository        Repository for managing Post entities.
-     * @param userRepository        Repository for managing User entities.
-     * @param commentRepository     Repository for managing Comment entities.
-     * @param modelMapper           Mapper for converting entities to DTOs and vice versa.
+     * @param postRepository Repository for managing Post entities.
+     * @param userRepository Repository for managing User entities.
+     * @param modelMapper    Mapper for converting entities to DTOs and vice versa.
      */
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository, CommentRepository commentRepository, ModelMapper modelMapper) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, ModelMapper modelMapper, MongoTemplate mongoTemplate) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
-        this.commentRepository = commentRepository;
         this.modelMapper = modelMapper;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -79,9 +78,16 @@ public class PostService {
                 .user(postAuthor)
                 .build();
 
-        postAuthor.addPost(post);
-
         postRepository.save(post);
+
+        Query query = Query.query(Criteria.where("_id").is(userId));
+        Update update = new Update().addToSet("posts", post);
+        mongoTemplate.updateFirst(query, update, User.class);
+
+
+        //  postAuthor.addPost(post);
+
+        //  userRepository.save(postAuthor);
 
         return modelMapper.map(post, PostDTO.class);
     }
@@ -108,39 +114,34 @@ public class PostService {
         postRepository.deleteById(postId);
     }
 
+
     /**
-     * Creates a new comment with the given content, associates it with the user identified by the specified userId
-     * and post identified by the specified postId.
+     * The savePostAsFavorite function saves post to user favorites.
      *
-     * @param userId  The unique identifier of the user who is the author of the comment.
-     * @param content The content of the comment.
-     * @param postId  The content of the post.
-     *
-     * @return {@link com.kostenko.demo.proxy.seller.dto.CommentDTO} object representing the newly created comment.
-     *
+     * @param postId id of a post to be deleted
+     * @param userId user requested, to his favorites post will be saved
      * @throws ResourceNotFoundException - if the user or post with the given userId is not found in the database.
      */
-    public CommentDTO createComment(String userId,
-                                 String content,
-                                 String postId) {
+    public void addPostToFavorites(String userId, String postId) {
+        // Perform a partial update to add the new favorite post
+        Query query = Query.query(Criteria.where("_id").is(userId));
+        Update update = new Update().addToSet("favoritePosts", postId);
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
 
-        User commentAuthor = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(UserService.ID_NOT_FOUND_MESSAGE, userId)));
 
-        Post commentedPost = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, userId)));
-
-        Comment comment = Comment.builder()
-                .content(content)
-                .user(commentAuthor)
-                .post(commentedPost)
-                .build();
-
-        commentAuthor.addComment(comment);
-        commentedPost.addComment(comment);
-
-        commentRepository.save(comment);
-
-        return modelMapper.map(comment, CommentDTO.class);
+    /**
+     * The deletePostFromFavorite function deletes a post from user favorites.
+     * If post with requested id doesn't exist in favorites, silently ignores request
+     *
+     * @param postId id of a post to be deleted from favorites
+     * @param userId user requested deletion
+     * @throws ResourceNotFoundException - if the user with the given userId is not found in the database.
+     */
+    public void removePostFromFavorites(String userId, String postId) {
+        // Perform a partial update to remove the specified favorite post
+        Query query = Query.query(Criteria.where("_id").is(userId));
+        Update update = new Update().pull("favoritePosts", postId);
+        mongoTemplate.updateFirst(query, update, User.class);
     }
 }

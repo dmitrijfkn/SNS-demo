@@ -22,17 +22,15 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthorityService authorityService;
     private final ModelMapper modelMapper;
-    protected static String ID_NOT_FOUND_MESSAGE = "User with id: \"%d\" doesn't exist.";
-    protected static String USERNAME_NOT_FOUND_MESSAGE = "User with username: \"%d\" doesn't exist.";
+    protected static String ID_NOT_FOUND_MESSAGE = "User with id: \"%s\" doesn't exist.";
+    protected static String USERNAME_NOT_FOUND_MESSAGE = "User with username: \"%s\" doesn't exist.";
     protected static String ACCESS_DENIED_MESSAGE = "Access denied. Insufficient permissions.";
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthorityService authorityService, ModelMapper modelMapper) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.authorityService = authorityService;
         this.modelMapper = modelMapper;
     }
 
