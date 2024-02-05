@@ -1,7 +1,10 @@
 package com.kostenko.demo.proxy.seller.service;
 
+import com.kostenko.demo.proxy.seller.dto.CommentDTO;
 import com.kostenko.demo.proxy.seller.dto.LikeDTO;
+import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
+import com.kostenko.demo.proxy.seller.entity.Comment;
 import com.kostenko.demo.proxy.seller.entity.Like;
 import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.entity.User;
@@ -18,6 +21,11 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing posts, providing methods for post-related operations.
@@ -87,7 +95,7 @@ public class PostService {
 
         Post post = Post.builder()
                 .content(content)
-                .user(postAuthor)
+                .postCreator(postAuthor)
                 .build();
 
         postRepository.save(post);
@@ -119,7 +127,7 @@ public class PostService {
             return;
         }
 
-        if (!post.getUser().getId().equals(userId)) {
+        if (!post.getPostCreator().getId().equals(userId)) {
             throw new AccessDeniedException(UserService.ACCESS_DENIED_MESSAGE);
         }
 
@@ -168,7 +176,7 @@ public class PostService {
 
         Like like = Like.builder()
                 .post(postToLike)
-                .user(user)
+                .likeCreator(user)
                 .build();
 
         likeRepository.save(like);
@@ -187,7 +195,7 @@ public class PostService {
 
     @Transactional
     public void removeLikeFromPost(String userId, String postId) {
-        Like like = likeRepository.findByUserIdAndPostId(userId, postId);
+        Like like = likeRepository.findByLikeCreatorIdAndPostId(userId, postId);
 
         // Remove like from post
         Query query = Query.query(Criteria.where("_id").is(postId));
@@ -200,5 +208,40 @@ public class PostService {
         mongoTemplate.updateFirst(query, update, User.class);
 
         likeRepository.delete(like);
+    }
+
+    public NewsfeedDTO newsfeed(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Test tetstes"));
+
+        Set<PostDTO> posts = user
+                .getFollowing()
+                .stream()
+                .flatMap(following -> following.getPosts().stream())
+                .sorted(Comparator.comparing(Post::getCreatedAt))
+                .map(post -> modelMapper.map(post, PostDTO.class))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Set<LikeDTO> likes = user
+                .getFollowing()
+                .stream()
+                .flatMap(following -> following.getLikes().stream())
+                .sorted(Comparator.comparing(Like::getCreatedAt))
+                .map(like -> modelMapper.map(like, LikeDTO.class))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        Set<CommentDTO> comments = user
+                .getFollowing()
+                .stream()
+                .flatMap(following -> following.getComments().stream())
+                .sorted(Comparator.comparing(Comment::getCreatedAt))
+                .map(comment -> modelMapper.map(comment, CommentDTO.class))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        return NewsfeedDTO.builder()
+                .posts(posts)
+                .likes(likes)
+                .comments(comments)
+                .build();
     }
 }

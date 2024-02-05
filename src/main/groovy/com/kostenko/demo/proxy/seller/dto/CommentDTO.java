@@ -1,8 +1,12 @@
 package com.kostenko.demo.proxy.seller.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,7 +16,9 @@ public class CommentDTO {
 
     private String content;
 
-   // private SimpleUserDTO user;
+    private SimplePostDTO postDTO;
+
+    private SimpleUserDTO postCreator;
 
     private Instant createdAt;
 

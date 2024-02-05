@@ -20,21 +20,17 @@ public class UserController {
 
 
     /**
+     * Constant error message template for error, if user want to subscribe to himself.
+     */
+    protected static final String SAME_ID_MESSAGE = "User requested and user mentioned is the same.";
+    /**
      * Service for handling user-related operations.
      */
     private final UserService userService;
-
-
     /**
      * Service for handling JWT-related operations.
      */
     private final JwtService jwtService;
-
-
-    /**
-     * Constant error message template for error, if user want to subscribe to himself.
-     */
-    protected static final String SAME_ID_MESSAGE = "User requested and user mentioned is the same.";
 
     /**
      * Constructs a UserController with the specified dependencies.
@@ -93,11 +89,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/follow/{userId}")
     ResponseEntity<HttpStatus> followToUser(@PathVariable(name = "userId") String userId,
-                                               @CookieValue("accessToken") String accessCookie
+                                            @CookieValue("accessToken") String accessCookie
     ) {
         String requesterId = jwtService.extractUserId(accessCookie);
 
-        if(requesterId.equals(userId)){
+        if (requesterId.equals(userId)) {
             throw new IllegalArgumentException(SAME_ID_MESSAGE);
         }
 
@@ -118,11 +114,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/unfollow/{userId}")
     ResponseEntity<HttpStatus> unfollowFromUser(@PathVariable(name = "userId") String userId,
-                                                   @CookieValue("accessToken") String accessCookie
+                                                @CookieValue("accessToken") String accessCookie
     ) {
         String requesterId = jwtService.extractUserId(accessCookie);
 
-        if(requesterId.equals(userId)){
+        if (requesterId.equals(userId)) {
             throw new IllegalArgumentException(SAME_ID_MESSAGE);
         }
 
@@ -135,16 +131,3 @@ public class UserController {
 // TODO rewrite Api docs:
 
 // TODO add validators to both DTO's and entities
-
-// Api docs example:
-/**
- * @Operation(summary = "Save new author")
- * @ApiResponses(value = {
- * @ApiResponse(responseCode = "201", description = "Author saved successfully",
- * content = {@Content(mediaType = "application/json",
- * schema = @Schema(implementation = Author.class))}),
- * @ApiResponse(responseCode = "400", description = "Invalid request",
- * content = {@Content(mediaType = "application/json",
- * schema = @Schema(implementation = ApplicationError.class))})
- * })
- */

@@ -17,6 +17,9 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Service
 public class CommentService {
@@ -76,7 +79,7 @@ public class CommentService {
         Comment comment = Comment.builder()
                 .content(content)
                 .user(commentAuthor)
-                .post(commentedPost)
+                .commentCreator(commentedPost)
                 .build();
 
         commentRepository.save(comment);
@@ -103,4 +106,12 @@ public class CommentService {
     }
 
 
+    public Set<CommentDTO> getPostComments(String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(PostService.ID_NOT_FOUND_MESSAGE, postId)));
+        return post
+                .getComments()
+                .stream().map(element -> modelMapper.map(element, CommentDTO.class))
+                .collect(Collectors.toSet());
+    }
 }

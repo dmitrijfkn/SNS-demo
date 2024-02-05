@@ -13,5 +13,7 @@ public class LikeDTO {
 
     private String id;
 
-    private SimpleUserDTO user;
+    private SimplePostDTO post;
+
+    private SimpleUserDTO likeCreator;
 }

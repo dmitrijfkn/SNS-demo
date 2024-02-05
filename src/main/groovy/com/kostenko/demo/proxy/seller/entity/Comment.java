@@ -26,7 +26,7 @@ public class Comment {
     private User user;
 
     @DBRef
-    private Post post;
+    private Post commentCreator;
 
     @CreatedDate
     private Instant createdAt;

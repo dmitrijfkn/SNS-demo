@@ -35,8 +35,7 @@ public class UserSecurity implements AuthorizationManager<RequestAuthorizationCo
      * Checks whether the authenticated user has the specified user ID.
      *
      * @param authentication The Authentication object representing the authenticated user.
-     * @param userId          The user ID to check against.
-     *
+     * @param userId         The user ID to check against.
      * @return true if the authenticated user has the specified user ID, false otherwise.
      */
     public boolean hasUserId(Authentication authentication, String userId) {

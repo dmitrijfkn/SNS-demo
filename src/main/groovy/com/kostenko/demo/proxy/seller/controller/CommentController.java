@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 /**
  * Controller class for handling comment-related operations.
  */
@@ -27,6 +29,7 @@ public class CommentController {
      */
     private final CommentService commentService;
 
+
     /**
      * Constructs a CommentController with the specified dependencies.
      *
@@ -39,6 +42,7 @@ public class CommentController {
         this.jwtService = jwtService;
         this.commentService = commentService;
     }
+
 
     /**
      * Creates a new comment on a post based on the provided content and access token cookie.
@@ -59,5 +63,18 @@ public class CommentController {
         String userId = jwtService.extractUserId(accessCookie);
 
         return commentService.createComment(userId, commentCreationDTO.getContent(), commentCreationDTO.getPostId());
+    }
+
+
+    /**
+     * Returns all comments under post with ID requested
+     *
+     * @param postId id of a post to find comments of
+     * @return A {@link java.util.Set} of {@link com.kostenko.demo.proxy.seller.dto.CommentDTO}'s.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/postComments/{postId}")
+    Set<CommentDTO> getPostComments(@PathVariable(name = "postId") String postId) {
+        return commentService.getPostComments(postId);
     }
 }

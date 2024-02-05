@@ -24,16 +24,14 @@ import java.util.Set;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-
-    private final PostRepository postRepository;
-
-    private final PasswordEncoder passwordEncoder;
-    private final ModelMapper modelMapper;
-    private final MongoTemplate mongoTemplate;
     protected static final String ID_NOT_FOUND_MESSAGE = "User with id: \"%s\" doesn't exist.";
     protected static final String USERNAME_NOT_FOUND_MESSAGE = "User with username: \"%s\" doesn't exist.";
     protected static final String ACCESS_DENIED_MESSAGE = "Access denied. Insufficient permissions.";
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+    private final MongoTemplate mongoTemplate;
 
     @Autowired
     public UserService(UserRepository userRepository, PostRepository postRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, MongoTemplate mongoTemplate) {
@@ -83,7 +81,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, userId)));
 
-        postRepository.deleteAllByUser(user);
+        postRepository.deleteAllByPostCreator(user);
         userRepository.delete(user);
     }
 

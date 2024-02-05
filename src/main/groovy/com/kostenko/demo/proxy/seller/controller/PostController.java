@@ -1,14 +1,17 @@
 package com.kostenko.demo.proxy.seller.controller;
 
-import com.kostenko.demo.proxy.seller.dto.LikeDTO;
+import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
 import com.kostenko.demo.proxy.seller.dto.PostCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
+import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 /**
  * Controller class for handling post-related operations.
@@ -151,5 +154,11 @@ public class PostController {
         postService.removeLikeFromPost(userId, postId);
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @GetMapping("/newsfeed/{userId}")
+    NewsfeedDTO newsfeed(@PathVariable(name = "userId") String userId) {
+        return postService.newsfeed(userId);
     }
 }

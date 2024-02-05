@@ -26,7 +26,7 @@ public class Post {
     private String content;
 
     @DBRef(lazy = true)
-    private User user;
+    private User postCreator;
 
     @DBRef
     private Set<Comment> comments;

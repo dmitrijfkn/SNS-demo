@@ -36,30 +36,26 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     /**
-     * Length of life of a JWT access token in seconds.
-     */
-    @Value("${jwt.cookieExpiry}")
-    private int cookieExpiry;
-
-    /**
      * Service for handling refresh tokens.
      */
     private final RefreshTokenService refreshTokenService;
-
     /**
      * Service for handling JWT-related operations.
      */
     private final JwtService jwtService;
-
     /**
      * Authentication manager for user authentication.
      */
     private final AuthenticationManager authenticationManager;
-
     /**
      * Service for user-related operations.
      */
     private final UserService userService;
+    /**
+     * Length of life of a JWT access token in seconds.
+     */
+    @Value("${jwt.cookieExpiry}")
+    private int cookieExpiry;
 
     /**
      * Constructs an AuthController with the specified dependencies.
@@ -84,9 +80,7 @@ public class AuthController {
      *
      * @param userRequest   The user registration DTO containing user details.
      * @param bindingResult The result of the validation.
-     *
      * @return A UserResponse representing the newly registered user.
-     *
      * @throws IllegalArgumentException If the user registration data is invalid.
      */
     @PostMapping(value = "/registration")
@@ -106,7 +100,6 @@ public class AuthController {
      *
      * @param accessCookie The value of the access token cookie.
      * @param response     The HTTP servlet response.
-     *
      * @return ResponseEntity with HTTP status 200.
      */
     @PostMapping(value = "/logout")

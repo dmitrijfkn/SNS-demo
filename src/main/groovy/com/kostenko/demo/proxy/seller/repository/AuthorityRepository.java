@@ -2,7 +2,6 @@ package com.kostenko.demo.proxy.seller.repository;
 
 import com.kostenko.demo.proxy.seller.entity.Authority;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository

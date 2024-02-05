@@ -30,15 +30,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     /**
+     * Defines the whitelist of URLs that do not require authentication.
+     */
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger-ui/**"
+    };
+    /**
      * JWT Authentication filter for handling authentication using JWT tokens.
      */
     private final JwtAuthFilter jwtAuthFilter;
-
     /**
      * Custom security configuration for requests with personal user data that should only be visible to the user itself.
      */
     private final UserSecurity userSecurity;
-
     /**
      * Service for loading user details and managing user authentication.
      */
@@ -56,14 +60,6 @@ public class SecurityConfig {
         this.userSecurity = userSecurity;
         this.userDetailsService = userDetailsService;
     }
-
-    /**
-     * Defines the whitelist of URLs that do not require authentication.
-     */
-    private static final String[] AUTH_WHITELIST = {
-            "/swagger-ui/**"
-    };
-
 
     /**
      * Configures the security settings for the application.

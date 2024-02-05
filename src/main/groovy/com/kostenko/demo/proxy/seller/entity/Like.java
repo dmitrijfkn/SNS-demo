@@ -21,7 +21,7 @@ public class Like {
     private String id;
 
     @DBRef
-    private User user;
+    private User likeCreator;
 
     @DBRef
     private Post post;
