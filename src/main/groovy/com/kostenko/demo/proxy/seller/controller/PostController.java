@@ -1,5 +1,6 @@
 package com.kostenko.demo.proxy.seller.controller;
 
+import com.kostenko.demo.proxy.seller.dto.LikeDTO;
 import com.kostenko.demo.proxy.seller.dto.PostCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
 import com.kostenko.demo.proxy.seller.service.JwtService;
@@ -110,6 +111,44 @@ public class PostController {
         String userId = jwtService.extractUserId(accessCookie);
 
         postService.removePostFromFavorites(userId, postId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * Adds like to a post based on the provided post ID and user ID from access token cookie.
+     *
+     * @param postId       The ID of the post.
+     * @param accessCookie The value of the access token cookie.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/like/add/{postId}")
+    ResponseEntity<HttpStatus> addLikeToPost(@PathVariable(name = "postId") String postId,
+                                             @CookieValue("accessToken") String accessCookie) {
+        String userId = jwtService.extractUserId(accessCookie);
+
+        postService.addLikeToPost(userId, postId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    /**
+     * Remove like to a post based on the provided post ID and user ID from access token cookie.
+     *
+     * @param postId       The ID of the post.
+     * @param accessCookie The value of the access token cookie.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/like/remove/{postId}")
+    ResponseEntity<HttpStatus> removeLikeFromPost(@PathVariable(name = "postId") String postId,
+                                                  @CookieValue("accessToken") String accessCookie) {
+        String userId = jwtService.extractUserId(accessCookie);
+
+        postService.removeLikeFromPost(userId, postId);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

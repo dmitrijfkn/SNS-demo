@@ -1,9 +1,12 @@
 package com.kostenko.demo.proxy.seller.service;
 
+import com.kostenko.demo.proxy.seller.dto.LikeDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
+import com.kostenko.demo.proxy.seller.entity.Like;
 import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.entity.User;
 import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
+import com.kostenko.demo.proxy.seller.repository.LikeRepository;
 import com.kostenko.demo.proxy.seller.repository.PostRepository;
 import com.kostenko.demo.proxy.seller.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -35,12 +38,16 @@ public class PostService {
      * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.User} entities in MongoDB.
      */
     private final UserRepository userRepository;
-
+    /**
+     * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.Like} entities in MongoDB.
+     */
+    private final LikeRepository likeRepository;
     /**
      * Mapper for converting entities to DTOs and vice versa.
      */
     private final ModelMapper modelMapper;
     private final MongoTemplate mongoTemplate;
+
 
     /**
      * Constructs a PostService with the specified repositories and model mapper.
@@ -51,9 +58,15 @@ public class PostService {
      */
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository, ModelMapper modelMapper, MongoTemplate mongoTemplate) {
+    public PostService(PostRepository postRepository,
+                       UserRepository userRepository,
+                       LikeRepository likeRepository,
+                       ModelMapper modelMapper,
+                       MongoTemplate mongoTemplate
+    ) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.likeRepository = likeRepository;
         this.modelMapper = modelMapper;
         this.mongoTemplate = mongoTemplate;
     }
@@ -142,5 +155,50 @@ public class PostService {
         Query query = Query.query(Criteria.where("_id").is(userId));
         Update update = new Update().pull("favoritePosts", postId);
         mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+
+    @Transactional
+    public void addLikeToPost(String userId, String postId) {
+        Post postToLike = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, postId)));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(UserService.ID_NOT_FOUND_MESSAGE, userId)));
+
+        Like like = Like.builder()
+                .post(postToLike)
+                .user(user)
+                .build();
+
+        likeRepository.save(like);
+
+        // Add like to post
+        Query query = Query.query(Criteria.where("_id").is(postId));
+        Update update = new Update().addToSet("likes", like.getId());
+        mongoTemplate.updateFirst(query, update, Post.class);
+
+        // Add like to User
+        query = Query.query(Criteria.where("_id").is(userId));
+        update = new Update().addToSet("likes", like.getId());
+        mongoTemplate.updateFirst(query, update, User.class);
+    }
+
+
+    @Transactional
+    public void removeLikeFromPost(String userId, String postId) {
+        Like like = likeRepository.findByUserIdAndPostId(userId, postId);
+
+        // Remove like from post
+        Query query = Query.query(Criteria.where("_id").is(postId));
+        Update update = new Update().pull("likes", like.getId());
+        mongoTemplate.updateFirst(query, update, Post.class);
+
+        // Remove like from User
+        query = Query.query(Criteria.where("_id").is(userId));
+        update = new Update().pull("likes", like.getId());
+        mongoTemplate.updateFirst(query, update, User.class);
+
+        likeRepository.delete(like);
     }
 }

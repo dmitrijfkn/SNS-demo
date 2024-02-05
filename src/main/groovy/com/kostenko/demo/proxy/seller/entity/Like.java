@@ -15,6 +15,7 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Like {
     @Id
     private String id;
