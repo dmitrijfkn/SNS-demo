@@ -1,14 +1,17 @@
 package com.kostenko.demo.proxy.seller.controller;
 
+import com.kostenko.demo.proxy.seller.dto.UserEditDTO;
 import com.kostenko.demo.proxy.seller.dto.UserPageDTO;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -74,6 +77,22 @@ public class UserController {
     ResponseEntity<HttpStatus> deleteUser(@PathVariable(name = "userId") String userId) {
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @PostMapping("/edit/{userId}")
+    ResponseEntity<?> editUser(@PathVariable(name = "userId") String userId,
+                               @RequestBody @Valid UserEditDTO userRequest,
+                               BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException(bindingResult.getAllErrors().toString());
+        }
+        if (userRequest.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(userService.edit(userRequest, userId), HttpStatus.OK);
     }
 
 

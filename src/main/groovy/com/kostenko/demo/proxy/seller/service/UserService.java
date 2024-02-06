@@ -1,6 +1,7 @@
 package com.kostenko.demo.proxy.seller.service;
 
 
+import com.kostenko.demo.proxy.seller.dto.UserEditDTO;
 import com.kostenko.demo.proxy.seller.dto.UserPageDTO;
 import com.kostenko.demo.proxy.seller.dto.UserRegistrationDTO;
 import com.kostenko.demo.proxy.seller.dto.UserResponse;
@@ -25,7 +26,7 @@ import java.util.Set;
 public class UserService {
 
     protected static final String ID_NOT_FOUND_MESSAGE = "User with id: \"%s\" doesn't exist.";
-    protected static final String USERNAME_NOT_FOUND_MESSAGE = "User with username: \"%s\" doesn't exist.";
+    protected static final String USERNAME_ALREADY_EXISTS_MESSAGE = "User with username: \"%s\" already exist.";
     protected static final String ACCESS_DENIED_MESSAGE = "Access denied. Insufficient permissions.";
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -44,14 +45,11 @@ public class UserService {
 
     //TODO write docs
     public UserResponse saveNewUser(UserRegistrationDTO userRequest, Set<Authority> authorities) {
-
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        //  user.setCreatedAt(Instant.now());
-        //  user.setUpdatedAt(Instant.now());
 
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new IllegalArgumentException(String.format(USERNAME_NOT_FOUND_MESSAGE, user.getUsername()));
+            throw new IllegalArgumentException(String.format(USERNAME_ALREADY_EXISTS_MESSAGE, user.getUsername()));
         } else {
             if (authorities != null && !authorities.isEmpty()) {
                 user.setAuthorities(authorities);
@@ -62,6 +60,29 @@ public class UserService {
         return modelMapper.map(user, UserResponse.class);
     }
 
+
+    public UserResponse edit(UserEditDTO userRequest, String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, userId)));
+
+        if (userRequest.getUsername() != null && !user.getUsername().equals(userRequest.getUsername())) {
+            if (userRepository.existsByUsername(userRequest.getUsername())) {
+                throw new IllegalArgumentException(String.format(USERNAME_ALREADY_EXISTS_MESSAGE, userRequest.getUsername()));
+            } else {
+                user.setUsername(userRequest.getUsername());
+            }
+        }
+
+        if(userRequest.getPassword()!=null){
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        }
+
+        userRepository.save(user);
+
+        return modelMapper.map(user, UserResponse.class);
+    }
+
+
     public UserPageDTO getUserPage(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, userId)));
@@ -71,7 +92,7 @@ public class UserService {
 
     public User findByUsername(String username) {
         if (!userRepository.existsByUsername(username)) {
-            throw new ResourceNotFoundException(String.format(USERNAME_NOT_FOUND_MESSAGE, username));
+            throw new ResourceNotFoundException(String.format(USERNAME_ALREADY_EXISTS_MESSAGE, username));
         }
         return userRepository.findByUsername(username);
     }

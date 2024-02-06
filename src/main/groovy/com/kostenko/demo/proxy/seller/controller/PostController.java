@@ -3,15 +3,12 @@ package com.kostenko.demo.proxy.seller.controller;
 import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
 import com.kostenko.demo.proxy.seller.dto.PostCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
-import com.kostenko.demo.proxy.seller.entity.Post;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 
 /**
  * Controller class for handling post-related operations.
@@ -58,6 +55,25 @@ public class PostController {
         String userId = jwtService.extractUserId(accessCookie);
 
         return postService.createPost(userId, postCreationDTO.getContent());
+    }
+
+
+    /**
+     * Deletes a post based on the provided post ID and user ID from access token cookie.
+     * If post with requested id doesn't exist, silently return OK
+     *
+     * @param postId       The ID of the post to be deleted.
+     * @param accessCookie The value of the access token cookie.
+     * @return ResponseEntity with HTTP status OK.
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @DeleteMapping("/edit/{postId}")
+    ResponseEntity<?> deletePost(@PathVariable(name = "postId") String postId,
+                                          @RequestBody PostCreationDTO postDTO,
+                                          @CookieValue("accessToken") String accessCookie) {
+        String userId = jwtService.extractUserId(accessCookie);
+
+        return new ResponseEntity<>(postService.editPost(postId, postDTO,userId),HttpStatus.OK);
     }
 
 

@@ -1,9 +1,6 @@
 package com.kostenko.demo.proxy.seller.service;
 
-import com.kostenko.demo.proxy.seller.dto.CommentDTO;
-import com.kostenko.demo.proxy.seller.dto.LikeDTO;
-import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
-import com.kostenko.demo.proxy.seller.dto.PostDTO;
+import com.kostenko.demo.proxy.seller.dto.*;
 import com.kostenko.demo.proxy.seller.entity.Comment;
 import com.kostenko.demo.proxy.seller.entity.Like;
 import com.kostenko.demo.proxy.seller.entity.Post;
@@ -104,13 +101,26 @@ public class PostService {
         Update update = new Update().addToSet("posts", post);
         mongoTemplate.updateFirst(query, update, User.class);
 
+        return modelMapper.map(post, PostDTO.class);
+    }
 
-        //  postAuthor.addPost(post);
 
-        //  userRepository.save(postAuthor);
+    public PostDTO editPost(String postId, PostCreationDTO postDTO, String userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, postId)));
+
+        if (!post.getPostCreator().getId().equals(userId)) {
+            throw new AccessDeniedException(UserService.ACCESS_DENIED_MESSAGE);
+        }
+
+        if (!post.getContent().equals(postDTO.getContent())) {
+            post.setContent(postDTO.getContent());
+        }
+        postRepository.save(post);
 
         return modelMapper.map(post, PostDTO.class);
     }
+
 
     /**
      * The deletePost function deletes a post with certain id from the database.
