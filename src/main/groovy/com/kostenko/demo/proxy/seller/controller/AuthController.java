@@ -4,7 +4,6 @@ package com.kostenko.demo.proxy.seller.controller;
 import com.kostenko.demo.proxy.seller.dto.*;
 import com.kostenko.demo.proxy.seller.entity.RefreshToken;
 import com.kostenko.demo.proxy.seller.entity.User;
-import com.kostenko.demo.proxy.seller.error.ApplicationError;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.RefreshTokenService;
 import com.kostenko.demo.proxy.seller.service.UserService;
@@ -90,11 +89,11 @@ public class AuthController {
                     content = @Content(schema = @Schema(implementation = UserResponse.class))),
             @ApiResponse(responseCode = "400",
                     description = "User data is incorrect or user with specified username already exists, user can't be created.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @PostMapping(value = "/registration")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse saveUser(@RequestBody @Valid UserRegistrationDTO userRequest,
+    public UserResponse saveUser(@RequestBody @Valid AuthRequestDTO userRequest,
                                  BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new IllegalArgumentException(bindingResult.getAllErrors().toString());
@@ -151,7 +150,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Logged in successfully.",
                     content = @Content(schema = @Schema(implementation = JwtResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Invalid user credentials.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
@@ -177,7 +176,7 @@ public class AuthController {
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
             return JwtResponseDTO.builder()
                     .accessToken(accessToken)
-                    .token(refreshToken.getToken()).build();
+                    .refreshToken(refreshToken.getToken()).build();
 
         } else {
             throw new UsernameNotFoundException("Invalid user credentials.");
@@ -200,7 +199,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Token refreshed successfully.",
                     content = @Content(schema = @Schema(implementation = JwtResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Refresh token is invalid.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @PostMapping("/refreshToken")
     @ResponseStatus(HttpStatus.OK)
@@ -212,7 +211,7 @@ public class AuthController {
                     String accessToken = jwtService.GenerateToken(userInfo.getUsername());
                     return JwtResponseDTO.builder()
                             .accessToken(accessToken)
-                            .token(refreshTokenRequestDTO.getToken()).build();
+                            .refreshToken(refreshTokenRequestDTO.getToken()).build();
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("Refresh token is invalid"));
     }

@@ -1,9 +1,9 @@
 package com.kostenko.demo.proxy.seller.controller;
 
+import com.kostenko.demo.proxy.seller.dto.ApplicationErrorDTO;
 import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
 import com.kostenko.demo.proxy.seller.dto.PostCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
-import com.kostenko.demo.proxy.seller.error.ApplicationError;
 import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.PostService;
@@ -62,10 +62,10 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = PostDTO.class))),
             @ApiResponse(responseCode = "400",
                     description = "Provided data is incorrect, post can't be created.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "User which made request can't be founded.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
@@ -92,10 +92,10 @@ public class PostController {
                     description = "Post edited successfully."),
             @ApiResponse(responseCode = "403",
                     description = "User which made request isn't a author of a post.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "Post with specified id don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/edit/{postId}")
@@ -122,10 +122,10 @@ public class PostController {
                     description = "Post deleted successfully."),
             @ApiResponse(responseCode = "403",
                     description = "User which made request isn't a author of a post.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "Post with specified id don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/delete/{postId}")
@@ -152,7 +152,7 @@ public class PostController {
                     description = "Post added to favorites successfully."),
             @ApiResponse(responseCode = "404",
                     description = "Post with specified id don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/favorite/add/{postId}")
@@ -201,7 +201,7 @@ public class PostController {
                     description = "Post liked successfully."),
             @ApiResponse(responseCode = "404",
                     description = "Post or user which made request don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/like/add/{postId}")
@@ -251,10 +251,10 @@ public class PostController {
                     content = @Content(schema = @Schema(implementation = NewsfeedDTO.class))),
             @ApiResponse(responseCode = "403",
                     description = "User who made request didn't the one which newsfeed need to be returned.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "User with id provided don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/newsfeed/{userId}")

@@ -1,8 +1,8 @@
 package com.kostenko.demo.proxy.seller.controller;
 
+import com.kostenko.demo.proxy.seller.dto.ApplicationErrorDTO;
 import com.kostenko.demo.proxy.seller.dto.CommentCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.CommentDTO;
-import com.kostenko.demo.proxy.seller.error.ApplicationError;
 import com.kostenko.demo.proxy.seller.service.CommentService;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,10 +64,10 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = CommentDTO.class))),
             @ApiResponse(responseCode = "403",
                     description = "User mot authorized.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "Specified user or post doesn't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
@@ -97,7 +97,7 @@ public class CommentController {
                     content = @Content(schema = @Schema(implementation = CommentDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "Post with id provided don't exist.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/postComments/{postId}")

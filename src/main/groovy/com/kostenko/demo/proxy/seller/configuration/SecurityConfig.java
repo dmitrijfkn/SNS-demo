@@ -76,7 +76,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/registration", "/user/login", "/user/refreshToken", "/user/logout").permitAll()
                                 .requestMatchers("/post/create").authenticated()
                                 .requestMatchers("/user/page/{userId}").permitAll()
-                                .requestMatchers("/user/delete/{userId}","/user/edit/{userId}").access(userSecurity)
+                                .requestMatchers("/user/delete/{userId}", "/user/edit/{userId}").access(userSecurity)
                                 .requestMatchers("/post/newsfeed/{userId}").access(userSecurity)
                                 .requestMatchers("/post/favorite/**").permitAll()
                                 .anyRequest().permitAll()

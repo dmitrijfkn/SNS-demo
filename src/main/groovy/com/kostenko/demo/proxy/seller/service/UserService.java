@@ -1,9 +1,9 @@
 package com.kostenko.demo.proxy.seller.service;
 
 
+import com.kostenko.demo.proxy.seller.dto.AuthRequestDTO;
 import com.kostenko.demo.proxy.seller.dto.UserEditDTO;
 import com.kostenko.demo.proxy.seller.dto.UserPageDTO;
-import com.kostenko.demo.proxy.seller.dto.UserRegistrationDTO;
 import com.kostenko.demo.proxy.seller.dto.UserResponse;
 import com.kostenko.demo.proxy.seller.entity.Authority;
 import com.kostenko.demo.proxy.seller.entity.User;
@@ -44,7 +44,7 @@ public class UserService {
     }
 
     //TODO write docs
-    public UserResponse saveNewUser(UserRegistrationDTO userRequest, Set<Authority> authorities) {
+    public UserResponse saveNewUser(AuthRequestDTO userRequest, Set<Authority> authorities) {
         User user = modelMapper.map(userRequest, User.class);
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 

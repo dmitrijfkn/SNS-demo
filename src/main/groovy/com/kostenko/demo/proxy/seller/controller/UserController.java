@@ -1,9 +1,9 @@
 package com.kostenko.demo.proxy.seller.controller;
 
+import com.kostenko.demo.proxy.seller.dto.ApplicationErrorDTO;
 import com.kostenko.demo.proxy.seller.dto.UserEditDTO;
 import com.kostenko.demo.proxy.seller.dto.UserPageDTO;
 import com.kostenko.demo.proxy.seller.dto.UserResponse;
-import com.kostenko.demo.proxy.seller.error.ApplicationError;
 import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.UserService;
@@ -67,7 +67,7 @@ public class UserController {
                     content = @Content(schema = @Schema(implementation = UserPageDTO.class))),
             @ApiResponse(responseCode = "404",
                     description = "User with requests id doesn't present in database.",
-                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+                    content = @Content(schema = @Schema(implementation = ApplicationErrorDTO.class)))
     })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/page/{userId}")

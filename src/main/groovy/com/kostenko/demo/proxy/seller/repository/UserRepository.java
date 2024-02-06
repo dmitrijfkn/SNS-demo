@@ -2,12 +2,14 @@ package com.kostenko.demo.proxy.seller.repository;
 
 import com.kostenko.demo.proxy.seller.entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.stereotype.Repository;
 
 /**
  * Repository for managing {@link com.kostenko.demo.proxy.seller.entity.User} entities in MongoDB.
  */
 @Repository
+@RepositoryRestResource(exported = false)
 public interface UserRepository extends MongoRepository<User, String> {
 
     /**
