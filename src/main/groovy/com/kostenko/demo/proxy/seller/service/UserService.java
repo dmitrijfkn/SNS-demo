@@ -73,7 +73,7 @@ public class UserService {
             }
         }
 
-        if(userRequest.getPassword()!=null){
+        if (userRequest.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         }
 
@@ -97,6 +97,7 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+
     @Transactional
     public void deleteUser(String userId) {
         User user = userRepository.findById(userId)
@@ -106,6 +107,8 @@ public class UserService {
         userRepository.delete(user);
     }
 
+
+    @Transactional
     public void followToUser(String requesterId, String userIdToFollow) {
         if (!userRepository.existsById(userIdToFollow)) {
             throw new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, userIdToFollow));
@@ -121,6 +124,8 @@ public class UserService {
         mongoTemplate.updateFirst(query, update, User.class);
     }
 
+
+    @Transactional
     public void unfollowFromUser(String requesterId, String userIdToFollow) {
         Query query = Query.query(Criteria.where("_id").is(requesterId));
         Update update = new Update().pull("following", userIdToFollow);

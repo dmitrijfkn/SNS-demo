@@ -2,8 +2,14 @@ package com.kostenko.demo.proxy.seller.controller;
 
 import com.kostenko.demo.proxy.seller.dto.CommentCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.CommentDTO;
+import com.kostenko.demo.proxy.seller.error.ApplicationError;
 import com.kostenko.demo.proxy.seller.service.CommentService;
 import com.kostenko.demo.proxy.seller.service.JwtService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,6 +57,18 @@ public class CommentController {
      * @param accessCookie       The value of the access token cookie.
      * @return A {@link com.kostenko.demo.proxy.seller.dto.CommentDTO} representing the newly created comment.
      */
+    @Operation(summary = "Create a new comment")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Comment created successfully.",
+                    content = @Content(schema = @Schema(implementation = CommentDTO.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "User mot authorized.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Specified user or post doesn't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
     CommentDTO createComment(@RequestBody @Valid CommentCreationDTO commentCreationDTO,
@@ -72,6 +90,15 @@ public class CommentController {
      * @param postId id of a post to find comments of
      * @return A {@link java.util.Set} of {@link com.kostenko.demo.proxy.seller.dto.CommentDTO}'s.
      */
+    @Operation(summary = "Get post comments")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Post comments returned successfully.",
+                    content = @Content(schema = @Schema(implementation = CommentDTO.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Post with id provided don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/postComments/{postId}")
     Set<CommentDTO> getPostComments(@PathVariable(name = "postId") String postId) {

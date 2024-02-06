@@ -153,6 +153,9 @@ public class PostService {
      * @throws ResourceNotFoundException - if the user or post with the given userId is not found in the database.
      */
     public void addPostToFavorites(String userId, String postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new ResourceNotFoundException(String.format(ID_NOT_FOUND_MESSAGE, postId));
+        }
         // Perform a partial update to add the new favorite post
         Query query = Query.query(Criteria.where("_id").is(userId));
         Update update = new Update().addToSet("favoritePosts", postId);
@@ -222,7 +225,7 @@ public class PostService {
 
     public NewsfeedDTO newsfeed(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Test tetstes"));
+                .orElseThrow(() -> new ResourceNotFoundException(String.format(UserService.ID_NOT_FOUND_MESSAGE, userId)));
 
         Set<PostDTO> posts = user
                 .getFollowing()

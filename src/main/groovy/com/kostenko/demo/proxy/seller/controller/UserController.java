@@ -2,9 +2,14 @@ package com.kostenko.demo.proxy.seller.controller;
 
 import com.kostenko.demo.proxy.seller.dto.UserEditDTO;
 import com.kostenko.demo.proxy.seller.dto.UserPageDTO;
+import com.kostenko.demo.proxy.seller.dto.UserResponse;
+import com.kostenko.demo.proxy.seller.error.ApplicationError;
+import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
@@ -12,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -54,6 +60,15 @@ public class UserController {
      * @param userId The ID of the user for whom the page is requested.
      * @return A UserPageDTO representing the user page.
      */
+    @Operation(summary = "See user page of user with certain id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "User with requested id founded and returned.",
+                    content = @Content(schema = @Schema(implementation = UserPageDTO.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "User with requests id doesn't present in database.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/page/{userId}")
     UserPageDTO viewUserPage(@PathVariable(name = "userId") String userId) {
@@ -69,8 +84,10 @@ public class UserController {
      */
     @Operation(summary = "Delete user from the database")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User successfully deleted from database"),
-            @ApiResponse(responseCode = "403", description = "Permission denied, user with id requested for deletion isn't the one who made request")
+            @ApiResponse(responseCode = "200",
+                    description = "User successfully deleted from database"),
+            @ApiResponse(responseCode = "403",
+                    description = "Permission denied, user with id requested for deletion isn't the one who made request")
     })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/delete/{userId}")
@@ -80,6 +97,28 @@ public class UserController {
     }
 
 
+    /**
+     * Deletes a user from the database based on the provided user ID.
+     *
+     * @param userId        The ID of the user to be edited.
+     * @param userRequest   DTO object with data to change.
+     * @param bindingResult Object used to validate input data.
+     * @return ResponseEntity with HTTP status OK and edited user data
+     * @throws IllegalArgumentException  if user with provided username already exists or data provided is invalid
+     * @throws ResourceNotFoundException if user with provided userId doesn't exist
+     */
+    @Operation(summary = "Edit user data")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "User successfully edited",
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Request data have errors",
+                    content = @Content(schema = @Schema(implementation = ObjectError.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Permission denied, user with id requested for edit isn't the one who made request")
+    })
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping("/edit/{userId}")
     ResponseEntity<?> editUser(@PathVariable(name = "userId") String userId,
                                @RequestBody @Valid UserEditDTO userRequest,
@@ -97,7 +136,7 @@ public class UserController {
 
 
     /**
-     * Follow to a user.
+     * Follow a user.
      *
      * @param userId       The ID of the user to follow.
      * @param accessCookie Cookie used to extract request sender ID.
@@ -145,8 +184,3 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
-
-
-// TODO rewrite Api docs:
-
-// TODO add validators to both DTO's and entities

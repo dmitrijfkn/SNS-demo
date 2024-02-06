@@ -83,6 +83,15 @@ public class AuthController {
      * @return A UserResponse representing the newly registered user.
      * @throws IllegalArgumentException If the user registration data is invalid.
      */
+    @Operation(summary = "Register a new user to the system")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "User registered successfully.",
+                    content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "User data is incorrect or user with specified username already exists, user can't be created.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @PostMapping(value = "/registration")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse saveUser(@RequestBody @Valid UserRegistrationDTO userRequest,
@@ -102,9 +111,12 @@ public class AuthController {
      * @param response     The HTTP servlet response.
      * @return ResponseEntity with HTTP status 200.
      */
+    @Operation(summary = "Logout from current user, clear access cookie")
+    @ApiResponse(responseCode = "200",
+            description = "Access cookie changed to outdated one and will be automatically deleted.")
     @PostMapping(value = "/logout")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Void> logOut(@CookieValue("accessToken") String accessCookie, HttpServletResponse response) {
+    public ResponseEntity<HttpStatus> logOut(@CookieValue("accessToken") String accessCookie, HttpServletResponse response) {
 
         String accessToken = jwtService.GenerateToken(jwtService.extractUserId(accessCookie));
 

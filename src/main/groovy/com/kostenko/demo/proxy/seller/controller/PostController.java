@@ -3,8 +3,15 @@ package com.kostenko.demo.proxy.seller.controller;
 import com.kostenko.demo.proxy.seller.dto.NewsfeedDTO;
 import com.kostenko.demo.proxy.seller.dto.PostCreationDTO;
 import com.kostenko.demo.proxy.seller.dto.PostDTO;
+import com.kostenko.demo.proxy.seller.error.ApplicationError;
+import com.kostenko.demo.proxy.seller.error.ResourceNotFoundException;
 import com.kostenko.demo.proxy.seller.service.JwtService;
 import com.kostenko.demo.proxy.seller.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +55,18 @@ public class PostController {
      * @param accessCookie    The value of the access token cookie.
      * @return A PostDTO representing the newly created post.
      */
+    @Operation(summary = "Create a new post")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201",
+                    description = "Post created successfully.",
+                    content = @Content(schema = @Schema(implementation = PostDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Provided data is incorrect, post can't be created.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "User which made request can't be founded.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/create")
     PostDTO createPost(@RequestBody PostCreationDTO postCreationDTO,
@@ -63,17 +82,29 @@ public class PostController {
      * If post with requested id doesn't exist, silently return OK
      *
      * @param postId       The ID of the post to be deleted.
+     * @param postDTO      Data for post update
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Edit a post")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Post edited successfully."),
+            @ApiResponse(responseCode = "403",
+                    description = "User which made request isn't a author of a post.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Post with specified id don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/edit/{postId}")
-    ResponseEntity<?> deletePost(@PathVariable(name = "postId") String postId,
-                                          @RequestBody PostCreationDTO postDTO,
-                                          @CookieValue("accessToken") String accessCookie) {
+    ResponseEntity<?> editPost(@PathVariable(name = "postId") String postId,
+                               @RequestBody PostCreationDTO postDTO,
+                               @CookieValue("accessToken") String accessCookie) {
         String userId = jwtService.extractUserId(accessCookie);
 
-        return new ResponseEntity<>(postService.editPost(postId, postDTO,userId),HttpStatus.OK);
+        return new ResponseEntity<>(postService.editPost(postId, postDTO, userId), HttpStatus.OK);
     }
 
 
@@ -85,6 +116,17 @@ public class PostController {
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Deletes a post")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Post deleted successfully."),
+            @ApiResponse(responseCode = "403",
+                    description = "User which made request isn't a author of a post.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Post with specified id don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/delete/{postId}")
     ResponseEntity<HttpStatus> deletePost(@PathVariable(name = "postId") String postId,
@@ -104,6 +146,14 @@ public class PostController {
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Add post to favorite")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Post added to favorites successfully."),
+            @ApiResponse(responseCode = "404",
+                    description = "Post with specified id don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/favorite/add/{postId}")
     ResponseEntity<HttpStatus> addPostToFavorites(@PathVariable(name = "postId") String postId,
@@ -123,6 +173,9 @@ public class PostController {
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Add post to favorite")
+    @ApiResponse(responseCode = "200",
+            description = "Post deleted from favorites successfully.")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/favorite/remove/{postId}")
     ResponseEntity<HttpStatus> removePostFromFavorites(@PathVariable(name = "postId") String postId,
@@ -142,6 +195,14 @@ public class PostController {
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Add like to a post")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Post liked successfully."),
+            @ApiResponse(responseCode = "404",
+                    description = "Post or user which made request don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
     @ResponseStatus(HttpStatus.OK)
     @PostMapping("/like/add/{postId}")
     ResponseEntity<HttpStatus> addLikeToPost(@PathVariable(name = "postId") String postId,
@@ -155,12 +216,15 @@ public class PostController {
 
 
     /**
-     * Remove like to a post based on the provided post ID and user ID from access token cookie.
+     * Remove like from a post based on the provided post ID and user ID from access token cookie.
      *
      * @param postId       The ID of the post.
      * @param accessCookie The value of the access token cookie.
      * @return ResponseEntity with HTTP status OK.
      */
+    @Operation(summary = "Removes like from a post")
+    @ApiResponse(responseCode = "200",
+            description = "Like removed successfully.")
     @ResponseStatus(HttpStatus.OK)
     @DeleteMapping("/like/remove/{postId}")
     ResponseEntity<HttpStatus> removeLikeFromPost(@PathVariable(name = "postId") String postId,
@@ -173,6 +237,26 @@ public class PostController {
     }
 
 
+    /**
+     * Retrieves the newsfeed for a specified user.
+     *
+     * @param userId The unique identifier of the user whose newsfeed is to be retrieved.
+     * @return The newsfeed of the specified user.
+     * @throws ResourceNotFoundException if user with specified id doesn't exist
+     */
+    @Operation(summary = "Get user newsfeed")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "User newsfeed returned successfully.",
+                    content = @Content(schema = @Schema(implementation = NewsfeedDTO.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "User who made request didn't the one which newsfeed need to be returned.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "User with id provided don't exist.",
+                    content = @Content(schema = @Schema(implementation = ApplicationError.class)))
+    })
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/newsfeed/{userId}")
     NewsfeedDTO newsfeed(@PathVariable(name = "userId") String userId) {
         return postService.newsfeed(userId);
